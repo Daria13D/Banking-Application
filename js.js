@@ -5,14 +5,14 @@ const account1 = {
   movements: [200, 450, -400, 3000, -650, -130, 70, 1300],
   pin: 1111,
   movementsDates: [
-    "2024-01-26T21:31:17.178Z",
-    "2024-01-26T07:42:02.383Z",
-    "2024-01-26T09:15:04.904Z",
-    "2024-01-26T10:17:24.185Z",
-    "2024-01-01T14:11:59.604Z",
-    "2024-01-20T17:01:17.194Z",
-    "2024-01-11T23:36:17.929Z",
-    "2024-01-12T10:51:36.790Z",
+    "2019-11-18T21:31:17.178Z",
+    "2019-12-23T07:42:02.383Z",
+    "2020-01-28T09:15:04.904Z",
+    "2020-04-01T10:17:24.185Z",
+    "2020-05-08T14:11:59.604Z",
+    "2020-05-27T17:01:17.194Z",
+    "2020-07-11T23:36:17.929Z",
+    "2020-07-12T10:51:36.790Z",
   ],
   currency: "RUB",
   locale: "pt-PT",
@@ -100,132 +100,164 @@ const inputLoanAmount = document.querySelector(".form__input--loan-amount");
 const inputCloseUsername = document.querySelector(".form__input--user");
 const inputClosePin = document.querySelector(".form__input--pin");
 
-function formatMovementDate(date) {
-  const calcDayPassed = (date1, date2) => {
-    return Math.round((date1 - date2) / (1000 * 60 * 60 * 24));
-  };
-  const daysPassed = calcDayPassed(new Date(), date);
-  console.log(daysPassed);
-  if (daysPassed === 0) return "Сегодня";
-  if (daysPassed === 1) return "Вчера";
-  if (daysPassed >= 5) return `Прошло ${daysPassed} дней`;
-  if (2 <= daysPassed < 5) return `Прошло ${daysPassed} дня`;
-  const month = `${date.getMonth() + 1}`.padStart(2, 0);
-  const day = `${date.getDate()}`.padStart(2, 0);
-  return `${day}/${month}/${date.getFullYear()}`;
-}
+let currentAccount;
+let timer;
 
-//сумма ухода и прихода
-function sumModif(acc) {
-  const paymentsPlus = [];
-  const paymentsMinus = [];
-  acc.movements.forEach((payment) => {
-    if (payment > 0) {
-      paymentsPlus.push(payment);
-    } else {
-      paymentsMinus.push(payment);
-    }
-  });
-  const receipt = paymentsPlus.reduce((sum, payment) => {
-    return sum + payment;
-  });
-  const offs = paymentsMinus.reduce((sum, payment) => {
-    return sum + payment;
-  });
-  const sum = acc.movements.reduce((sum, payment) => {
-    return sum + payment;
-  });
-  labelSumIn.innerHTML = `${receipt}₽`;
-  labelSumOut.innerHTML = `${offs}₽`;
-  labelSumInterest.innerHTML = `${sum}₽`;
-}
-//баланс
-function changingOfBalance(acc) {
-  const balance = acc.movements.reduce((storage, value) => {
-    return storage + value;
-  });
-  acc.balance = balance;
-  labelBalance.innerHTML = `${acc.balance} RUB`;
-}
-//логин
-function createLogin(accs) {
-  accs.forEach((acc) => {
-    acc.logIn = acc.owner
-      .toLowerCase()
-      .split(" ")
-      .map((val) => val[0])
-      .join("");
-  });
-
-  // const userLogin = accs
-  //   .toLowerCase()
-  //   .split(" ")
-  //   .map((val) => val[0])
-  //   .join("");
-  // return userLogin;
-  // }
-  // accounts.forEach((val) => {
-  //   val.logIn = createLogin(val.owner);
-  //   console.log(val);
-}
-createLogin(accounts);
-console.log(accounts);
-//платежи
-function displayMovenets(acc, sort = false) {
+// Вывод на страницу всех приходов и уходов
+function displayMovements(movements, sort = false) {
   containerMovements.innerHTML = "";
 
-  const movs = sort
-    ? acc.movements.slice().sort((a, b) => a - b)
-    : acc.movements;
+  const movs = sort ? movements.slice().sort((a, b) => a - b) : movements;
+
   movs.forEach(function (value, i) {
-    const typeMessage = value > 0 ? "внесение" : "снятие";
-    const date = new Date(acc.movementsDates[i]);
-    const displayDate = formatMovementDate(date);
     const type = value > 0 ? "deposit" : "withdrawal";
-    const html = `<div class="movements__row">
-    <div class="movements__type movements__type--${type}">
-      ${i + 1} ${typeMessage}
-    </div>
-    <div class="movements__date">${displayDate}</div>
-    <div class="movements__value">${value}₽</div>
-  </div>`;
+    const typeMessage = value > 0 ? "внесение" : "снятие";
+    const html = `
+    <div class="movements__row">
+          <div class="movements__type movements__type--${type}">
+            ${i + 1} ${typeMessage}
+          </div>
+          <div class="movements__date">24/01/2037</div>
+          <div class="movements__value">${value}₽</div>
+        </div>
+    `;
     containerMovements.insertAdjacentHTML("afterbegin", html);
   });
 }
+// Создание логина из ФИО в объекте
+function createLogIn(accs) {
+  accs.forEach(function (acc) {
+    acc.logIn = acc.owner
+      .toLowerCase()
+      .split(" ")
+      .map(function (val) {
+        return val[0];
+      })
+      .join("");
+  });
+}
+createLogIn(accounts);
 
-function updateUi(acc) {
-  displayMovenets(acc);
-  changingOfBalance(acc);
-  sumModif(acc);
+// Подсчет и вывод на страницу общего баланса
+function calcPrintBalance(acc) {
+  acc.balance = acc.movements.reduce(function (acc, val) {
+    return acc + val;
+  });
+  const options = {
+    style: "currency",
+    currency: acc.currency,
+  };
+  labelBalance.textContent = ${acc.balance} RUB;
+  labelBalance.textContent = Intl.NumberFormat(acc.locale, options).format(
+    acc.balance
+  );
 }
 
-let currentAccount;
-//вход пользователя
-btnLogin.addEventListener("click", (e) => {
-  e.preventDefault(); //страница теперь не обновляется
-  currentAccount = accounts.find((acc) => {
+//Сумма и вывод на страницу прихода и ухода в footer
+function calcDisplaySum(movements) {
+  const options = {
+    style: "currency",
+    currency: currentAccount.currency,
+  };
+  const incomes = movements
+    .filter((mov) => mov > 0)
+    .reduce((acc, mov) => acc + mov, 0);
+
+  labelSumIn.textContent = Intl.NumberFormat(
+    currentAccount.locale,
+    options
+  ).format(incomes);
+
+  // labelSumIn.textContent = ${incomes}₽;
+
+  const out = movements
+    .filter((mov) => mov < 0)
+    .reduce((acc, mov) => acc + mov, 0);
+  // labelSumOut.textContent = ${Math.abs(out)}₽;
+  labelSumOut.textContent = Intl.NumberFormat(
+    currentAccount.locale,
+    options
+  ).format(Math.abs(out));
+
+  labelSumInterest.textContent = ${incomes + out}₽;
+  labelSumInterest.textContent = Intl.NumberFormat(
+    currentAccount.locale,
+    options
+  ).format(incomes + out);
+}
+
+//функция таймера
+function startLogOut() {
+  let time = 600;
+  function tik() {
+    const minute = String(Math.trunc(time / 60)).padStart(2, 0);
+    const sec = String(Math.trunc(time % 60)).padStart(2, 0);
+    labelTimer.textContent = ${minute}:${sec};
+
+    if (time == 0) {
+      clearInterval(timer);
+      containerApp.style.opacity = 0;
+    }
+    time--;
+  }
+  tik();
+  const timer = setInterval(tik, 1000);
+  return timer;
+}
+
+//Обновление интерфейса сайта
+function updateUi(acc) {
+  displayMovements(acc.movements);
+  calcPrintBalance(acc);
+  calcDisplaySum(acc.movements);
+}
+
+//Кнопка входа в аккаунт
+
+btnLogin.addEventListener("click", function (e) {
+  e.preventDefault();
+  console.log("Login");
+  currentAccount = accounts.find(function (acc) {
     return acc.logIn === inputLoginUsername.value;
   });
   console.log(currentAccount);
   if (currentAccount && currentAccount.pin === Number(inputLoginPin.value)) {
     containerApp.style.opacity = 100;
+
     inputLoginPin.value = inputLoginUsername.value = "";
 
-    //изменение даты текущего баланса
-    const now = new Date();
-    const month = `${now.getMonth() + 1}`.padStart(2, 0);
-    const day = `${now.getDate()}`.padStart(2, 0);
-    labelDate.textContent = `${day}/${month}/${now.getFullYear()}`;
+    function timeNow() {
+      const local = navigator.language; //получить настройку с нашим местоположением
+      const options = {
+        //объект для передачи конкретных данных страны (часы и минуты в данном случае)
+        hour: "numeric",
+        minute: "numeric",
+        year: "numeric",
+        month: "numeric",
+        day: "numeric",
+        // weekday: "short",
+        second: "numeric",
+        // timeZoneName: "long",
+        hour12: false,
+      };
+      labelDate.textContent = Intl.DateTimeFormat(local, options).format(
+        new Date()
+      );
+    }
+    setInterval(timeNow, 1);
 
-    displayMovenets(currentAccount);
-    changingOfBalance(currentAccount);
-    sumModif(currentAccount);
+    if (timer) {
+      clearInterval(timer);
+    }
+    timer = startLogOut();
+    updateUi(currentAccount);
   }
 });
 
-btnTransfer.addEventListener("click", (e) => {
+//Перевод денег на другой аккаунт
+btnTransfer.addEventListener("click", function (e) {
   e.preventDefault();
-  const reciveAcc = accounts.find((acc) => {
+  const reciveAcc = accounts.find(function (acc) {
     return acc.logIn === inputTransferTo.value;
   });
   const amount = Number(inputTransferAmount.value);
@@ -234,132 +266,102 @@ btnTransfer.addEventListener("click", (e) => {
     reciveAcc &&
     amount > 0 &&
     currentAccount.balance >= amount &&
-    reciveAcc.logIn !== currentAccount
+    reciveAcc.logIn !== currentAccount.logIn
   ) {
-    currentAccount.movementsDates.push(new Date().toISOString());
     currentAccount.movements.push(-amount);
     reciveAcc.movements.push(amount);
+    clearInterval(timer);
+    timer = startLogOut();
     updateUi(currentAccount);
-    inputTransferAmount.value = inputTransferTo.value = "";
+    inputTransferTo.value = inputTransferAmount.value = "";
   }
 });
-
-// const arr = [100, 222, 333, 444];
-// let usd = [];
-// arr.forEach(function (value) {
-//   usd.push((value / 100).toFixed(1));
-// });
-// console.log(usd);
-
-// const arr2 = arr.map((value) => value / 100);
-// console.log(arr2);
-
-// const arr = [0, 7, 5, -12, -45, 5, -1, 34];
-
-// const arr2 = arr.filter((value) => value >= 0);
-// console.log(arr2);
-
-// const sum = arr.reduce(function (acc, value, key, arr) {
-//   return acc + value;
-// });
-// console.log(sum);
-
-// const max = arr.reduce((acc, val) => {
-//   if (acc > val) {
-//     return acc;
-//   } else {
-//     return val;
-//   }
-// }, arr[0]);
-// console.log(max);
-
-// const index = accounts.findIndex((acc)=>{
-//   return acc.logIn === 'df'
-// })
-// console.log(index);
-
-//функция закрытия аккаунта
-btnClose.addEventListener("click", (e) => {
+//Удаление аккаунта
+btnClose.addEventListener("click", function (e) {
   e.preventDefault();
   if (
     inputCloseUsername.value === currentAccount.logIn &&
     Number(inputClosePin.value) === currentAccount.pin
   ) {
-    const index = accounts.findIndex((acc) => {
+    const index = accounts.findIndex(function (acc) {
       return acc.logIn === currentAccount.logIn;
     });
     console.log(index);
     accounts.splice(index, 1);
     containerApp.style.opacity = 0;
+    console.log(accounts);
   }
   inputCloseUsername.value = inputClosePin.value = "";
 });
-//функция внесения денег
-btnLoan.addEventListener("click", (e) => {
+
+//Внесение денег на счет
+btnLoan.addEventListener("click", function (e) {
   e.preventDefault();
   const amount = Number(inputLoanAmount.value);
   if (amount > 0) {
     currentAccount.movements.push(amount);
-    currentAccount.movementsDates.push(new Date().toISOString());
+    clearInterval(timer);
+    timer = startLogOut();
     updateUi(currentAccount);
   }
   inputLoanAmount.value = "";
 });
 
-let sorted = false;
-btnSort.addEventListener("click", (e) => {
-  e.preventDefault();
-  displayMovenets(currentAccount, !sorted);
-  sorted = !sorted;
-});
-// const accMov = accounts.map((acc)=>{
-//   return acc.movements
-// })
-// console.log(accMov);
-// const allMov = accMov.flat()
-// console.log(allMov);
-// const allBalance = allMov.reduce((acc, val)=>{return acc+val}, 0)
+// Общий баланс длинно
+// const accMov = accounts.map(function (acc) {
+//   return acc.movements;
+// });
+// const allMov = accMov.flat();
+
+// const allBalance = allMov.reduce(function (acc, mov) {
+//   return acc + mov;
+// }, 0);
 // console.log(allBalance);
 
-const overBalance = accounts
+// Общий баланс коротко
+const overalBalance = accounts
   .map((acc) => acc.movements)
   .flat()
-  .reduce((acc, val) => acc + val, 0);
-console.log(overBalance);
+  .reduce((acc, mov) => acc + mov, 0);
 
-// const someResult = arr.some((val)=>{
-//   return val<0
-// })
-// const everyRes = arr.every((val)=>{return val>0})
-// console.log(someResult);
-// console.log(everyRes);
+//Сортировка по приходам и уходам
+let sorted = false;
+btnSort.addEventListener("click", function (e) {
+  e.preventDefault();
+  displayMovements(currentAccount.movements, !sorted);
+  sorted = !sorted;
+});
 
-// const arr = [[1,[2,3]], 4, [5,6,7]]
-// console.log(arr.flat(2));
-// const arr = ['e', 't', 'a', 'q']
-// console.log(arr.sort());
+//Изменение значка валюты
+labelBalance.addEventListener("click", function () {
+  Array.from(document.querySelectorAll(".movements__value"), function (val, i) {
+    return (val.innerText = val.textContent.replace("₽", "RUB"));
+  });
+});
 
-const arr = [1, 2, 3, 4, 5];
-console.log(arr.fill(1, 2, 4));
-const arr2 = "13445";
-console.log(Array.from(arr2, (val) => "Число " + val));
+const local = navigator.language; //получить настройку с нашим местоположением
+console.log(local);
+//даты и время для разных стран
+const options = {
+  //объект для передачи конкретных данных страны (часы и минуты в данном случае)
+  hour: "numeric",
+  minute: "numeric",
+};
+const now = new Date();
+const gb = Intl.DateTimeFormat("ar-AE", options).format(now); // прописывается код страны, можно найти на сайте language code table
+console.log(gb);
 
-const future = new Date(2025, 3, 13);
-const now = new Date(2025, 2, 13);
-const res = +future - +now;
-console.log(Math.round(res / 1000 / 60 / 60));
+const num = 5758474749;
+const options1 = {
+  style: "currency",
+  currency: "RUB",
+};
+const ru = Intl.NumberFormat("ru-RU", options1).format(num); //статья INTL в справочнике
+const ge = Intl.NumberFormat("de-DE", options1).format(num);
+console.log(ru);
+console.log(ge);
 
-console.log([] + false - null + true); //Nan
-console.log(5*'хелло'); 
-const a=[1,2]
-const b=[1,2]
-console.log(a==b);
-(function() { alert(a) })()
-
-
-
-let obj = {
-  "0": 1,
-  0: 2
- };
- alert( obj[0] );
+// if(true){
+//   clearTimeout(timer1)
+//   clearInterval(timer2)
+// }
