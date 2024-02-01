@@ -192,7 +192,7 @@ function startLogOut() {
   function tik() {
     const minute = String(Math.trunc(time / 60)).padStart(2, 0);
     const sec = String(Math.trunc(time % 60)).padStart(2, 0);
-    labelTimer.textContent = ${minute}:${sec};
+    labelTimer.textContent = `${minute}:${sec}`;
 
     if (time == 0) {
       clearInterval(timer);
