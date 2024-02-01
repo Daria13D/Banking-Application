@@ -147,7 +147,7 @@ function calcPrintBalance(acc) {
     style: "currency",
     currency: acc.currency,
   };
-  labelBalance.textContent = ${acc.balance} RUB;
+  //labelBalance.textContent = ${acc.balance} RUB;
   labelBalance.textContent = Intl.NumberFormat(acc.locale, options).format(
     acc.balance
   );
