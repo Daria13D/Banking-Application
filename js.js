@@ -179,7 +179,7 @@ function calcDisplaySum(movements) {
     options
   ).format(Math.abs(out));
 
-  //labelSumInterest.textContent = `${incomes + out}₽`;
+  // labelSumInterest.textContent = ${incomes + out}₽;
   labelSumInterest.textContent = Intl.NumberFormat(
     currentAccount.locale,
     options
@@ -360,8 +360,3 @@ const ru = Intl.NumberFormat("ru-RU", options1).format(num); //статья INTL
 const ge = Intl.NumberFormat("de-DE", options1).format(num);
 console.log(ru);
 console.log(ge);
-
-// if(true){
-//   clearTimeout(timer1)
-//   clearInterval(timer2)
-// }
