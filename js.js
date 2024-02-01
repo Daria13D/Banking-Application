@@ -179,7 +179,7 @@ function calcDisplaySum(movements) {
     options
   ).format(Math.abs(out));
 
-  labelSumInterest.textContent = ${incomes + out}₽;
+  labelSumInterest.textContent = `${incomes + out}₽`;
   labelSumInterest.textContent = Intl.NumberFormat(
     currentAccount.locale,
     options
